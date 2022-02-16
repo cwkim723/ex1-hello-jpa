@@ -77,10 +77,10 @@ public class JpaMain {
             */
 
             // 조건부 조회
-            List<Member> result = em.createQuery("select m from Member as m", Member.class).setFirstResult(5).setMaxResults(8).getResultList();
-            for (Member member : result) {
-                System.out.println("member.name = " + member.getName());
-            }
+//            List<Member> result = em.createQuery("select m from Member as m", Member.class).setFirstResult(5).setMaxResults(8).getResultList();
+//            for (Member member : result) {
+//                System.out.println("member.name = " + member.getName());
+//            }
             /*
                 Hibernate:
                 select
@@ -93,7 +93,30 @@ public class JpaMain {
                         Member member0_ limit ? offset ?
             */
 
-            tx.commit();
+            // 비영속 -> jpa와 관련없음
+            Member member = new Member();
+            member.setId(100L);
+            member.setName("HelloJPA");
+
+            // 영속
+            System.out.println("=== BEFORE ===");
+            em.persist(member); // member가 영속성 컨텍스트에 의해 관리되기 시작
+//            em.detach(member); // 회원 엔티티를 영속성 컨텍스트에서 분리, 준영속 상태
+            System.out.println("=== AFTER ===");
+            /*
+                === BEFORE ===
+                === AFTER ===
+                Hibernate: 
+                    insert hellojpa.Member
+                         insert
+                                    into
+                            Member
+                                    (name, id)
+                            values
+                                    (?, ?)
+            */
+
+            tx.commit(); // 이거 하는 시점에 db로 쿼리가 날라감
         } catch (Exception e) {
             tx.rollback();
         } finally {
