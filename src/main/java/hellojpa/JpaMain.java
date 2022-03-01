@@ -94,15 +94,16 @@ public class JpaMain {
             */
 
             // 비영속 -> jpa와 관련없음
-            Member member = new Member();
-            member.setId(100L);
-            member.setName("HelloJPA");
+//            Member member = new Member();
+////            member.setId(100L);
+//            member.setId(101L);
+//            member.setName("HelloJPA");
 
             // 영속
-            System.out.println("=== BEFORE ===");
-            em.persist(member); // member가 영속성 컨텍스트에 의해 관리되기 시작
-//            em.detach(member); // 회원 엔티티를 영속성 컨텍스트에서 분리, 준영속 상태
-            System.out.println("=== AFTER ===");
+//            System.out.println("=== BEFORE ===");
+//            em.persist(member); // member가 영속성 컨텍스트에 의해 관리되기 시작
+////            em.detach(member); // 회원 엔티티를 영속성 컨텍스트에서 분리, 준영속 상태
+//            System.out.println("=== AFTER ===");
             /*
                 === BEFORE ===
                 === AFTER ===
@@ -116,7 +117,102 @@ public class JpaMain {
                                     (?, ?)
             */
 
-            tx.commit(); // 이거 하는 시점에 db로 쿼리가 날라감
+
+            // 없는 데이터 처음 실행
+//            Member findMember = em.find(Member.class, 101L);
+//            System.out.println("findMember.id = " + findMember.getId());
+//            System.out.println("findMember.name = " + findMember.getName());
+
+            /*
+                findMember.id = 101 // select 쿼리 없음. 1차 캐시에서 조회
+                findMember.name = HelloJPA
+                Hibernate:
+                    insert hellojpa.Member
+                        insert
+                                into
+                        Member
+                                (name, id)
+                        values
+                                (?, ?)
+            */
+
+            // 영속
+            // 1차 캐시에서 조회
+//            Member findMember1 = em.find(Member.class, 101L);
+//            Member findMember2 = em.find(Member.class, 101L);
+//            System.out.println("result = " + (findMember1 == findMember2));
+//            result = true
+            /*
+            Hibernate:
+            select
+                member0_.id as id1_0_0_,
+                member0_.name as name2_0_0_
+            from
+                Member member0_
+            where
+                member0_.id=?
+            */
+
+            // 영속
+//            Member member1 = new Member(150L, "A");
+//            Member member2 = new Member(160L, "B");
+//
+//            em.persist(member1);
+//            em.persist(member2);
+//
+//            System.out.println("=========================");
+//            tx.commit(); // 이거 하는 시점에 db로 쿼리가 날라감
+            /*
+            =========================
+            Hibernate:
+                insert hellojpa.Member
+                    insert
+                            into
+                    Member
+                            (name, id)
+                    values
+                            (?, ?)
+            Hibernate:
+                insert hellojpa.Member
+                insert
+                        into
+                Member
+                        (name, id)
+                values
+                        (?, ?)
+            */
+            // System.out.println("=========================");가 출력된 이후에 쿼리로 날라감 -> tx.commit;을 함으로써 db에 저장됨을 알 수 있음
+
+            Member member = em.find(Member.class, 150L);
+            member.setName("ZZZZZ"); // 이게 변경 끝임
+
+//            em.persist(member); // 이 코드가 있어야 하는 것이 아닐까? -> 쓰면 X
+//            if(member.getName().equals("ZZZZZ")){
+//                em.persist(member);
+//            } // 이럴 때나 persist 씀
+
+            System.out.println("======================");
+            tx.commit(); // 변경 반영
+            /*
+            Hibernate:
+                select
+                    member0_.id as id1_0_0_,
+                    member0_.name as name2_0_0_
+                from
+                    Member member0_
+                where
+                    member0_.id=?
+            ======================
+            Hibernate:
+                update
+                    hellojpa.Member update
+                                Member
+                        set
+                        name=?
+                        where
+                        id=?
+            */
+
         } catch (Exception e) {
             tx.rollback();
         } finally {
