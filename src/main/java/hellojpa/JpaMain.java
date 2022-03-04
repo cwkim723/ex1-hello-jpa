@@ -183,16 +183,15 @@ public class JpaMain {
             */
             // System.out.println("=========================");가 출력된 이후에 쿼리로 날라감 -> tx.commit;을 함으로써 db에 저장됨을 알 수 있음
 
-            Member member = em.find(Member.class, 150L);
-            member.setName("ZZZZZ"); // 이게 변경 끝임
+//            Member member = em.find(Member.class, 150L);
+//            member.setName("ZZZZZ"); // 이게 변경 끝임
 
 //            em.persist(member); // 이 코드가 있어야 하는 것이 아닐까? -> 쓰면 X
 //            if(member.getName().equals("ZZZZZ")){
 //                em.persist(member);
 //            } // 이럴 때나 persist 씀
 
-            System.out.println("======================");
-            tx.commit(); // 변경 반영
+
             /*
             Hibernate:
                 select
@@ -211,6 +210,26 @@ public class JpaMain {
                         name=?
                         where
                         id=?
+            */
+
+            Member member = new Member(200L, "member200");
+            em.persist(member);
+
+            em.flush();
+
+            System.out.println("======================");
+            tx.commit(); // 변경 반영
+
+            /*
+                Hibernate:
+                    insert hellojpa.Member
+                    insert
+                                into
+                        Member
+                                (name, id)
+                        values
+                                (?, ?)
+                ======================
             */
 
         } catch (Exception e) {
