@@ -183,7 +183,7 @@ public class JpaMain {
             */
             // System.out.println("=========================");가 출력된 이후에 쿼리로 날라감 -> tx.commit;을 함으로써 db에 저장됨을 알 수 있음
 
-//            Member member = em.find(Member.class, 150L);
+//            Member member = em.find(Member.class, 150L); // Member는 영속 상태 -> find를 통해 가져올 때 jpa가 150L을 영속성 컨텍스트에 올림
 //            member.setName("ZZZZZ"); // 이게 변경 끝임
 
 //            em.persist(member); // 이 코드가 있어야 하는 것이 아닐까? -> 쓰면 X
@@ -191,6 +191,8 @@ public class JpaMain {
 //                em.persist(member);
 //            } // 이럴 때나 persist 씀
 
+//            System.out.println("======================");
+//            tx.commit(); // 변경 반영
 
             /*
             Hibernate:
@@ -212,13 +214,13 @@ public class JpaMain {
                         id=?
             */
 
-            Member member = new Member(200L, "member200");
-            em.persist(member);
-
-            em.flush();
-
-            System.out.println("======================");
-            tx.commit(); // 변경 반영
+//            Member member = new Member(200L, "member200");
+//            em.persist(member);
+//
+//            em.flush();
+//
+//            System.out.println("======================");
+//            tx.commit(); // 변경 반영
 
             /*
                 Hibernate:
@@ -230,6 +232,60 @@ public class JpaMain {
                         values
                                 (?, ?)
                 ======================
+            */
+
+//            Member member = em.find(Member.class, 150L); // Member는 영속 상태 -> find를 통해 가져올 때 jpa가 150L을 영속성 컨텍스트에 올림
+//            member.setName("AAAAA"); // 이게 변경 끝임
+//
+//            em.detach(member); // 더 이상 영속성 컨텍스트에서 관리하지 마라 => tx.commit()해도 쿼리를 안날림
+//
+//            Member member2 = em.find(Member.class, 150L);
+//
+//            System.out.println("======================");
+//            tx.commit();
+
+            /*
+                Hibernate:
+                    select
+                        member0_.id as id1_0_0_,
+                        member0_.name as name2_0_0_
+                    from
+                        Member member0_
+                    where
+                        member0_.id=?
+                ======================
+            */
+
+            Member member = em.find(Member.class, 150L); // Member는 영속 상태 -> find를 통해 가져올 때 jpa가 150L을 영속성 컨텍스트에 올림
+            member.setName("AAAAA"); // 이게 변경 끝임
+
+            em.clear(); // 초기화
+
+            Member member2 = em.find(Member.class, 150L);
+
+            System.out.println("======================");
+            tx.commit();
+            /*
+            Hibernate:
+                select
+                    member0_.id as id1_0_0_,
+                    member0_.name as name2_0_0_
+                from
+                    Member member0_
+                where
+                    member0_.id=?
+            Hibernate:
+                select
+                    member0_.id as id1_0_0_,
+                    member0_.name as name2_0_0_
+                from
+                    Member member0_
+                where
+                    member0_.id=?
+            ======================
+            // 첫 번째 쿼리는 Member member = em.find(Member.class, 150L);에 관한 쿼리고
+            // 두 번째 쿼리는 em.clear()를 했기 때문에 초기화 된 영속성 컨텍스트에서 다시 jpa가 150L을 영속성 컨텍스트에 올리기 위해 날리는 쿼리
+
             */
 
         } catch (Exception e) {
