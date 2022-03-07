@@ -256,15 +256,15 @@ public class JpaMain {
                 ======================
             */
 
-            Member member = em.find(Member.class, 150L); // Member는 영속 상태 -> find를 통해 가져올 때 jpa가 150L을 영속성 컨텍스트에 올림
-            member.setName("AAAAA"); // 이게 변경 끝임
+//            Member member = em.find(Member.class, 150L); // Member는 영속 상태 -> find를 통해 가져올 때 jpa가 150L을 영속성 컨텍스트에 올림
+//            member.setName("AAAAA"); // 이게 변경 끝임
 
-            em.clear(); // 초기화
+//            em.clear(); // 초기화
 
-            Member member2 = em.find(Member.class, 150L);
-
-            System.out.println("======================");
-            tx.commit();
+//            Member member2 = em.find(Member.class, 150L);
+//
+//            System.out.println("======================");
+//            tx.commit();
             /*
             Hibernate:
                 select
@@ -287,6 +287,15 @@ public class JpaMain {
             // 두 번째 쿼리는 em.clear()를 했기 때문에 초기화 된 영속성 컨텍스트에서 다시 jpa가 150L을 영속성 컨텍스트에 올리기 위해 날리는 쿼리
 
             */
+
+            Member member = new Member();
+            member.setId(3L);
+            member.setUsername("C");
+            member.setRoleType(RoleType.GUEST);
+
+            em.persist(member); // db에 저장
+
+            tx.commit();
 
         } catch (Exception e) {
             tx.rollback();
